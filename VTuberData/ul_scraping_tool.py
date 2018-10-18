@@ -2,12 +2,16 @@
 
 from bs4 import BeautifulSoup
 import requests
+import time
 import pandas as pd
+from tqdm import tqdm
 
 from youtube import YouTube, movieId2channelId
 
 BASE_URL = 'https://virtual-youtuber.userlocal.jp'
 RANKING_URL = BASE_URL + '/document/ranking'
+
+YouTube = YouTube()
 
 
 def get_ranking_page(page: int = 1):
@@ -25,16 +29,33 @@ def ranking(n: int = 100):
 
 
 def get_channel_id(url: str):
-    mid = get_one_video(url).split('?v=')[-1]
-    return movieId2channelId(YouTube(), mid)
+    for url in get_videos_url(url):
+        try:
+            mid = url.split("?v=")[-1]
+            return movieId2channelId(YouTube, mid)
+        except IndexError:
+            pass
+    raise IndexError
 
 
-def get_one_video(url: str):
+def get_videos_url(url: str):
     html = requests.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
-    return soup.find_all("div", attrs={"class": "card card-video"})[0].get("data-video-url")
+    return [c.get("data-video-url") for c in soup.find_all("div", attrs={"class": "card card-video"})]
+
+
+def create_ranking_csv(n: int = 100):
+    d = {"name": [], "ranking": [], "userlocal-url": [], "youtube-url": [], "channel_id": []}
+    for i, name, url in tqdm(ranking(n), total=n):
+        d["name"].append(name)
+        d["ranking"].append(i)
+        d["userlocal-url"].append(url)
+        cid = get_channel_id(url)
+        d["youtube-url"].append("https://www.youtube.com/channel/"+cid)
+        d["channel_id"].append(cid)
+        time.sleep(3)  # サーバーに負荷をかけないため
+    pd.DataFrame(d).to_csv("VTuber_list.csv")
 
 
 if __name__ == '__main__':
-    for i, n, u in ranking(n=51):
-        print(i, n, u)
+    create_ranking_csv(100)
