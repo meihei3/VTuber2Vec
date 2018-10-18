@@ -5,6 +5,8 @@ import argparse
 import pandas as pd
 from datetime import datetime, timedelta
 
+from config import API_KEY
+
 DEVELOPER_KEY = "%s"
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
@@ -21,10 +23,17 @@ def check_http_error(func):
     return wrapper
 
 
-def youtube(api=""):
+def YouTube(api=API_KEY):
     if api == "":
         raise ValueError("You must input API key.")
     return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, developerKey=api)
+
+
+def movieId2channelId(yt: str, mid: str):
+    return yt.search().list(
+        q=mid,
+        part="snippet"
+    ).execute()["items"][0]["snippet"]["channelId"]
 
 
 class Channel(object):
@@ -76,7 +85,7 @@ class Channel(object):
 
 
 def create_df(api="", channel_id=SIRO_CHANNEL_ID, n=100):
-    yt = youtube(api)
+    yt = YouTube(api)
     ch = Channel(yt, channel_id)
     df = pd.DataFrame(ch.get_video())
     df["url"] = df["video_id"].apply(lambda s: "https://www.youtube.com/watch?v=%s" % s)
