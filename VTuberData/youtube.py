@@ -1,9 +1,9 @@
 from apiclient.discovery import build
 from apiclient.errors import HttpError
 
-import argparse
 import pandas as pd
 from datetime import datetime, timedelta
+from tqdm import tqdm
 
 from config import API_KEY
 
@@ -78,8 +78,8 @@ class Channel(object):
         ).execute()
 
 
-def create_df(api="", channel_id=SIRO_CHANNEL_ID, n=100):
-    yt = YouTube(api)
+def create_df(channel_id=SIRO_CHANNEL_ID, n=100):
+    yt = YouTube()
     ch = Channel(yt, channel_id)
     df = pd.DataFrame(ch.get_video())
     df["url"] = df["video_id"].apply(lambda s: "https://www.youtube.com/watch?v=%s" % s)
@@ -89,33 +89,12 @@ def create_df(api="", channel_id=SIRO_CHANNEL_ID, n=100):
     return df
 
 
-def main(options):
-    df = create_df(api=options.api, channel_id=options.target_id, n=options.count)
-    df.to_csv("videos.csv")
-    print(df)
-
-
-def update(options):
-    # 過去n件からでーたを習得してcsvデータファイルに追加
-    # 過去n件以上の差があると穴ができる
-    # 仕様変えたので使ってはいけない
-    assert False, "TODO：新仕様に対応"
-    df = pd.read_csv("videos.csv", index_col=0, parse_dates=["published_at"])
-    last = df["published_at"].iloc[-1]
-    new_df = create_df(api=options.api, channel_id=options.target_id, n=options.count)
-    df = pd.concat([df, new_df[new_df["published_at"] > last]])
-    df.to_csv("videos.csv")
-    print(df)
+def main():
+    vtuber = pd.read_csv("VTuber_list.csv", index_col=0)
+    for i, channel_id in zip(tqdm(vtuber.index), vtuber.channel_id):
+        df = create_df(channel_id=channel_id)
+        df.to_csv("rank_{}.csv".format(i))
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="The csv of videos data creator from YouTube API")
-    parser.add_argument("--update", action='store_true', help="update the csv data if there is")
-    parser.add_argument("-t", "--target_id", type=str, help="the target channel id", default=SIRO_CHANNEL_ID)
-    parser.add_argument("-x", "--api", type=str, help="the GCP API key", required=True)
-    parser.add_argument("-n", "--count", type=int, help="the number of results", default=100)
-    args = parser.parse_args()
-    if args.update:
-        update(args)
-    else:
-        main(args)
+    main()
