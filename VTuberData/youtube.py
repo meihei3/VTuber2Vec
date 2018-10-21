@@ -29,7 +29,7 @@ def YouTube(api=API_KEY):
     return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, developerKey=api)
 
 
-def movieId2channelId(yt: str, mid: str):
+def video_id_to_channel_id(yt: str, mid: str):
     return yt.search().list(
         q=mid,
         part="snippet"
@@ -45,23 +45,18 @@ class Channel(object):
             raise ValueError("This channel id is not found.")
 
     def get_video(self):
-        # siro youtube専用。一日１件、多くて３件なのでnextPageTokenは無視
-        def datetime2str(dt):
-            return "{}-{:0>2}-{:0>2}T00:00:00Z".format(dt.year, dt.month, dt.day)
-
-        before = datetime.now()
-        after = before - timedelta(days=30)
+        # nextPageTokenはバグるけど100件なら行ける！
         res = {"published_at": [], "video_id": [], "title": []}
-        while True:
-            search_response = self.__search(part="snippet", max_result=50,
-                                            before=datetime2str(before), after=datetime2str(after))
+        token = None
+        for _ in range(2):
+            search_response = self.__search(part="snippet", max_result=50, token=token)
             res["title"] += [item["snippet"]["title"] for item in search_response["items"]]
             res["published_at"] += [item["snippet"]["publishedAt"] for item in search_response["items"]]
             res["video_id"] += [item["id"]["videoId"] for item in search_response["items"]]
             if search_response["pageInfo"]["totalResults"] == 0:
                 break
-            before = after
-            after = before - timedelta(days=30)
+            if "nextPageToken" in search_response:
+                token = search_response["nextPageToken"]
         return res
 
     @check_http_error
@@ -72,15 +67,14 @@ class Channel(object):
         ).execute()
 
     @check_http_error
-    def __search(self, part="id", max_result=25, order="date", after=None, before=None):
+    def __search(self, part="id", max_result=25, order="date", token=None):
         return self._youtube.search().list(
             channelId=self._channel_id,
             part=part,
             maxResults=max_result,
             order=order,
             type="video",
-            publishedAfter=after,
-            publishedBefore=before
+            pageToken=token
         ).execute()
 
 
