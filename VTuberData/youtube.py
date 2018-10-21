@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from tqdm import tqdm
 
-from config import API_KEY
+from config import YOUTUBE_API_KEY
 
 DEVELOPER_KEY = "%s"
 YOUTUBE_API_SERVICE_NAME = "youtube"
@@ -23,7 +23,7 @@ def check_http_error(func):
     return wrapper
 
 
-def YouTube(api=API_KEY):
+def YouTube(api=YOUTUBE_API_KEY):
     if api == "":
         raise ValueError("You must input API key.")
     return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, developerKey=api)
