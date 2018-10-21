@@ -58,6 +58,11 @@ def create_ranking_csv(n: int = 100):
     pd.DataFrame(d).to_csv("VTuber_list.csv")
 
 
+def update():
+    # ToDo:実装
+    pass
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Scraping UserLocal data and Save videos meta data from YouTube API")
     parser.add_argument("--init", action='store_true', help="create new VTuber ranking cvs")
@@ -66,5 +71,4 @@ if __name__ == '__main__':
     if args.init:
         create_ranking_csv(100)
     elif args.update:
-        # update
-        pass
+        update()
