@@ -5,6 +5,7 @@ import requests
 import time
 import pandas as pd
 from tqdm import tqdm
+import argparse
 
 from youtube import YouTube, movieId2channelId
 
@@ -58,4 +59,12 @@ def create_ranking_csv(n: int = 100):
 
 
 if __name__ == '__main__':
-    create_ranking_csv(100)
+    parser = argparse.ArgumentParser(description="Scraping UserLocal data and Save videos meta data from YouTube API")
+    parser.add_argument("--init", action='store_true', help="create new VTuber ranking cvs")
+    parser.add_argument("--update", action='store_true', help="update csv data")
+    args = parser.parse_args()
+    if args.init:
+        create_ranking_csv(100)
+    elif args.update:
+        # update
+        pass
