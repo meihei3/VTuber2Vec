@@ -7,7 +7,7 @@ import pandas as pd
 from tqdm import tqdm
 import argparse
 
-from youtube import YouTube, movieId2channelId
+from youtube import YouTube, video_id_to_channel_id
 
 BASE_URL = 'https://virtual-youtuber.userlocal.jp'
 RANKING_URL = BASE_URL + '/document/ranking'
@@ -33,7 +33,7 @@ def get_channel_id(url: str):
     for url in get_videos_url(url):
         try:
             mid = url.split("?v=")[-1]
-            return movieId2channelId(YouTube, mid)
+            return video_id_to_channel_id(YouTube, mid)
         except IndexError:
             pass
     raise IndexError
