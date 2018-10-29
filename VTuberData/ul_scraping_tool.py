@@ -51,9 +51,13 @@ def create_ranking_csv(n: int = 100):
         d["name"].append(name)
         d["ranking"].append(i)
         d["userlocal-url"].append(url)
-        cid = get_channel_id(url)
-        d["youtube-url"].append("https://www.youtube.com/channel/"+cid)
-        d["channel_id"].append(cid)
+        try:
+            cid = get_channel_id(url)
+            d["youtube-url"].append("https://www.youtube.com/channel/"+cid)
+            d["channel_id"].append(cid)
+        except IndexError:
+            d["youtube-url"].append("")
+            d["channel_id"].append("")
         time.sleep(3)  # サーバーに負荷をかけないため
     pd.DataFrame(d).to_csv("VTuber_list.csv")
 
@@ -66,9 +70,10 @@ def update():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Scraping UserLocal data and Save videos meta data from YouTube API")
     parser.add_argument("--init", action='store_true', help="create new VTuber ranking cvs")
+    parser.add_argument("--count", type=int, default=100, help="What the number of VTuber who will be saved to csv.")
     parser.add_argument("--update", action='store_true', help="update csv data")
     args = parser.parse_args()
     if args.init:
-        create_ranking_csv(100)
+        create_ranking_csv(args.count)
     elif args.update:
         update()
