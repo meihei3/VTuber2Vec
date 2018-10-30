@@ -1,0 +1,7 @@
+google-api-python-client==1.7.4
+gensim==3.6.0
+tqdm==4.19.5
+requests==2.20.0
+beautifulsoup4==4.6.0
+pandas==0.22.0
+mecab-python3==0.7
