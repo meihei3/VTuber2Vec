@@ -18,7 +18,7 @@ def main():
     model = Doc2Vec(documents=training, dm=0, window=3, alpha=0.013, min_alpha=0.013, min_count=1)
     for _ in tqdm(range(15)):
         model.train(training, total_examples=model.corpus_count, epochs=model.iter)
-        model.alpha -= 0.0012
+        model.alpha -= 0.0011
         model.min_alpha = model.alpha
     model.save('vtuber2vec.model')
 
