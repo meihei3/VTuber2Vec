@@ -91,7 +91,7 @@ def create_df(channel_id=SIRO_CHANNEL_ID, n=100):
 
 def main():
     vtuber = pd.read_csv("VTuber_list.csv", index_col=0).dropna().reset_index(drop=True)
-    for i, channel_id in zip(tqdm(vtuber.index), vtuber.channel_id):
+    for i, channel_id in zip(tqdm(vtuber.ranking), vtuber.channel_id):
         df = create_df(channel_id=channel_id)
         df.to_csv("rank_{}.csv".format(i))
 

@@ -12,7 +12,7 @@ def main():
     vtuber = pd.read_csv("VTuberData/VTuber_list.csv", index_col=0).dropna().reset_index(drop=True)
     print("pre processing vtuber titles")
     training = [
-        TaggedDocument(words=get_title_usable(i), tags=[name]) for i, name in zip(tqdm(vtuber.index), vtuber.name)
+        TaggedDocument(words=get_title_usable(i), tags=[name]) for i, name in zip(tqdm(vtuber.ranking), vtuber.name)
     ]
     print("\ntraining")
     model = Doc2Vec(documents=training, dm=0, window=3, alpha=0.013, min_alpha=0.013, min_count=1)
